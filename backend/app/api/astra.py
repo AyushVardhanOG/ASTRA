@@ -1,10 +1,26 @@
 from fastapi import APIRouter
+from pydantic import BaseModel
 
-router = APIRouter(prefix="/astra", tags=["ASTRA"])
+from app.services.astra_service import AstraService
 
 
-@router.get("/")
-async def home():
+router = APIRouter(
+    prefix="/astra",
+    tags=["ASTRA"],
+)
+
+service = AstraService()
+
+
+class PromptRequest(BaseModel):
+    prompt: str
+
+
+@router.post("/chat")
+async def chat(request: PromptRequest):
+
+    response = await service.chat(request.prompt)
+
     return {
-        "message": "ASTRA API is ready 🚀"
+        "response": response
     }
