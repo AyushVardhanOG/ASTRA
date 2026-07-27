@@ -49,6 +49,7 @@ export default function Dashboard() {
               projects.map((project) => (
                 <ProjectCard
                   key={project.id}
+                  id={project.id}
                   title={project.name}
                   status={project.status}
                 />

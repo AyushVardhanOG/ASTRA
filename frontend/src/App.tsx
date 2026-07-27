@@ -1,7 +1,15 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 import Dashboard from "./pages/Dashboard";
+import ProjectPage from "./pages/ProjectPage";
 
-function App() {
-  return <Dashboard />;
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/project/:id" element={<ProjectPage />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
-
-export default App;
