@@ -22,3 +22,5 @@ def health():
     return {
         "status": "healthy"
     }
+from app.api.astra import router as astra_router
+app.include_router(astra_router)
