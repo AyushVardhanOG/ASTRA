@@ -1,17 +1,10 @@
-from app.agents.business_agent import BusinessAgent
+from app.services.orchestrator import AstraOrchestrator
 
 
 class AstraService:
 
     def __init__(self):
-        self.business_agent = BusinessAgent()
+        self.orchestrator = AstraOrchestrator()
 
     async def analyse_business(self, request):
-
-        return await self.business_agent.analyse(
-            request.idea,
-            request.target_users,
-            request.budget,
-            request.timeline,
-            request.team_size,
-        )
+        return await self.orchestrator.analyse_business(request)
