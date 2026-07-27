@@ -1,25 +1,31 @@
 import { useParams } from "react-router-dom";
 
+import ProjectHeader from "../components/ProjectHeader";
+import ProjectTabs from "../components/ProjectTabs";
+import ProgressCard from "../components/ProgressCard";
+import SuggestionCard from "../components/SuggestionCard";
+import ActivityCard from "../components/ActivityCard";
+
 export default function ProjectPage() {
   const { id } = useParams();
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
-      <div className="border-b border-slate-800 p-8">
-        <h1 className="text-4xl font-bold">
-          Project #{id}
-        </h1>
+      <ProjectHeader title={`Project #${id}`} />
 
-        <p className="mt-2 text-slate-400">
-          Welcome to your AI CTO workspace.
-        </p>
-      </div>
+      <main className="mx-auto max-w-7xl p-8">
+        <ProjectTabs />
 
-      <div className="p-8">
-        <div className="rounded-xl bg-slate-900 p-8 border border-slate-800">
-          🚀 This is where ASTRA will manage your startup.
+        <div className="mt-8 grid gap-8 lg:grid-cols-2">
+          <ProgressCard />
+
+          <SuggestionCard />
         </div>
-      </div>
+
+        <div className="mt-8">
+          <ActivityCard />
+        </div>
+      </main>
     </div>
   );
 }
