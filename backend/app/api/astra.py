@@ -1,8 +1,7 @@
 from fastapi import APIRouter
-from pydantic import BaseModel
 
+from app.schemas.business import BusinessIdeaRequest
 from app.services.astra_service import AstraService
-
 
 router = APIRouter(
     prefix="/astra",
@@ -12,15 +11,11 @@ router = APIRouter(
 service = AstraService()
 
 
-class PromptRequest(BaseModel):
-    prompt: str
+@router.post("/analyse")
+async def analyse(request: BusinessIdeaRequest):
 
-
-@router.post("/chat")
-async def chat(request: PromptRequest):
-
-    response = await service.chat(request.prompt)
+    result = await service.analyse_business(request)
 
     return {
-        "response": response
+        "analysis": result
     }
