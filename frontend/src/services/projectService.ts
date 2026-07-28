@@ -1,12 +1,27 @@
 const API = "http://127.0.0.1:8000";
 
 export async function getProjects() {
-  const res = await fetch(`${API}/projects/`);
-  return await res.json();
+  const response = await fetch(`${API}/projects/`);
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch projects");
+  }
+
+  return response.json();
+}
+
+export async function getProject(id: number) {
+  const response = await fetch(`${API}/projects/${id}`);
+
+  if (!response.ok) {
+    throw new Error("Project not found");
+  }
+
+  return response.json();
 }
 
 export async function createProject(name: string) {
-  const res = await fetch(`${API}/projects/`, {
+  const response = await fetch(`${API}/projects/`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -16,5 +31,9 @@ export async function createProject(name: string) {
     }),
   });
 
-  return await res.json();
+  if (!response.ok) {
+    throw new Error("Failed to create project");
+  }
+
+  return response.json();
 }

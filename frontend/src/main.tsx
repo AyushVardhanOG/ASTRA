@@ -1,10 +1,32 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+} from "react-router-dom";
+
 import "./styles.css";
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
+import Dashboard from "./pages/Dashboard";
+import ProjectPage from "./pages/ProjectPage";
+
+ReactDOM.createRoot(
+  document.getElementById("root")!
+).render(
   <React.StrictMode>
-    <App />
+    <BrowserRouter>
+      <Routes>
+        <Route
+          path="/"
+          element={<Dashboard />}
+        />
+
+        <Route
+          path="/project/:id"
+          element={<ProjectPage />}
+        />
+      </Routes>
+    </BrowserRouter>
   </React.StrictMode>
 );

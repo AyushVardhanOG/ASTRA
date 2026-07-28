@@ -1,48 +1,51 @@
 from app.providers.gemini_provider import GeminiProvider
 
-
 provider = GeminiProvider()
 
 
-class AIService:
+async def generate_plan(data):
+    prompt = f"""
+You are an experienced Chief Technology Officer.
 
-    async def generate_plan(self, project_name: str) -> str:
-        prompt = f"""
-You are ASTRA AI.
+Your task is to generate a detailed startup blueprint.
 
-You are an experienced startup CTO.
+Startup Idea:
+{data.idea}
 
-Generate a complete startup blueprint.
+Problem:
+{data.problem}
 
-Project:
-{project_name}
+Target Audience:
+{data.audience}
 
-Return the following sections:
+Business Goal:
+{data.goal}
 
-# Vision
+Budget:
+{data.budget}
 
-# Problem
+Timeline:
+{data.timeline}
 
-# Target Users
+Generate the response in Markdown.
 
-# Competitor Analysis
+Include these sections:
+
+# Executive Summary
+
+# Business Model
+
+# Recommended Tech Stack
+
+# System Architecture
 
 # MVP Features
 
-# Tech Stack
-
-# Database Design
-
-# API Endpoints
-
-# Timeline
+# Development Roadmap
 
 # Risks
 
-# Monetization
+# Next Steps
 """
 
-        return await provider.generate(prompt)
-
-
-ai_service = AIService()
+    return await provider.generate(prompt)

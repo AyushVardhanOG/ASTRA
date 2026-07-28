@@ -1,31 +1,161 @@
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
 
-import ProjectHeader from "../components/ProjectHeader";
-import ProjectTabs from "../components/ProjectTabs";
-import ProgressCard from "../components/ProgressCard";
-import SuggestionCard from "../components/SuggestionCard";
-import ActivityCard from "../components/ActivityCard";
+import Sidebar from "../components/Sidebar";
+import Header from "../components/Header";
+import ProjectOverview from "../components/ProjectOverview";
+
+import { getProject } from "../services/projectService";
+import { generatePlan } from "../services/astraService";
+
+import type { Project } from "../types/project";
 
 export default function ProjectPage() {
   const { id } = useParams();
 
+  const [project, setProject] = useState<Project | null>(null);
+
+  const [idea, setIdea] = useState("");
+  const [problem, setProblem] = useState("");
+  const [audience, setAudience] = useState("");
+  const [goal, setGoal] = useState("");
+  const [budget, setBudget] = useState("");
+  const [timeline, setTimeline] = useState("");
+
+  const [loading, setLoading] = useState(false);
+  const [plan, setPlan] = useState("");
+
+  useEffect(() => {
+    async function loadProject() {
+      if (!id) return;
+
+      try {
+        const data = await getProject(Number(id));
+        setProject(data);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    loadProject();
+  }, [id]);
+
+  async function handleGenerate() {
+    if (
+      !idea ||
+      !problem ||
+      !audience ||
+      !goal ||
+      !budget ||
+      !timeline
+    ) {
+      alert("Please complete all fields before generating the AI plan.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await generatePlan({
+        idea,
+        problem,
+        audience,
+        goal,
+        budget,
+        timeline,
+      });
+
+      setPlan(response.plan);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to generate AI plan.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (!project) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white">
+        Loading...
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      <ProjectHeader title={`Project #${id}`} />
+    <div className="flex min-h-screen bg-slate-950 text-white">
+      <Sidebar />
 
-      <main className="mx-auto max-w-7xl p-8">
-        <ProjectTabs />
+      <div className="flex-1">
+        <Header />
 
-        <div className="mt-8 grid gap-8 lg:grid-cols-2">
-          <ProgressCard />
+        <main className="p-10">
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold">
+              {project.name}
+            </h1>
 
-          <SuggestionCard />
-        </div>
+            <p className="mt-2 text-slate-400">
+              Status: {project.status}
+            </p>
+          </div>
 
-        <div className="mt-8">
-          <ActivityCard />
-        </div>
-      </main>
+          <div className="grid grid-cols-12 gap-8">
+
+            <div className="col-span-7">
+
+              <ProjectOverview
+                idea={idea}
+                problem={problem}
+                audience={audience}
+                goal={goal}
+                budget={budget}
+                timeline={timeline}
+
+                setIdea={setIdea}
+                setProblem={setProblem}
+                setAudience={setAudience}
+                setGoal={setGoal}
+                setBudget={setBudget}
+                setTimeline={setTimeline}
+
+                onGenerate={handleGenerate}
+                loading={loading}
+              />
+
+            </div>
+
+            <div className="col-span-5">
+
+              <div className="rounded-xl border border-slate-800 bg-slate-900 p-8 min-h-[700px]">
+
+                <h2 className="text-2xl font-bold mb-6">
+                  AI CTO Output
+                </h2>
+
+                {!plan ? (
+                  <p className="text-slate-400 leading-8">
+                    Your AI-generated startup strategy will appear here after clicking
+                    <strong> Generate AI CTO Plan</strong>.
+                  </p>
+                ) : (
+                  <div className="prose prose-invert max-w-none">
+                    <ReactMarkdown>
+                      {plan}
+                    </ReactMarkdown>
+                  </div>
+                )}
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </main>
+
+      </div>
     </div>
   );
 }

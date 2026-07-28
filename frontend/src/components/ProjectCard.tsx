@@ -1,15 +1,15 @@
 import { Link } from "react-router-dom";
 
 type Props = {
+  id: number;
   title: string;
   status: string;
-  id?: number;
 };
 
 export default function ProjectCard({
+  id,
   title,
   status,
-  id,
 }: Props) {
   return (
     <Link to={`/project/${id}`}>
