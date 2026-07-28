@@ -9,6 +9,7 @@ class ProjectResponse(BaseModel):
     id: int
     name: str
     status: str
+    ai_report: str | None = None
 
     class Config:
         from_attributes = True

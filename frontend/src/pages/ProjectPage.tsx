@@ -32,7 +32,12 @@ export default function ProjectPage() {
 
       try {
         const data = await getProject(Number(id));
+
         setProject(data);
+
+        if (data.ai_report) {
+          setPlan(data.ai_report);
+        }
       } catch (err) {
         console.error(err);
       }
@@ -58,6 +63,7 @@ export default function ProjectPage() {
 
     try {
       const response = await generatePlan({
+        project_id: Number(id),
         idea,
         problem,
         audience,
@@ -104,7 +110,6 @@ export default function ProjectPage() {
           <div className="grid grid-cols-12 gap-8">
 
             <div className="col-span-7">
-
               <ProjectOverview
                 idea={idea}
                 problem={problem}
@@ -112,49 +117,46 @@ export default function ProjectPage() {
                 goal={goal}
                 budget={budget}
                 timeline={timeline}
-
                 setIdea={setIdea}
                 setProblem={setProblem}
                 setAudience={setAudience}
                 setGoal={setGoal}
                 setBudget={setBudget}
                 setTimeline={setTimeline}
-
                 onGenerate={handleGenerate}
                 loading={loading}
               />
-
             </div>
 
             <div className="col-span-5">
-
-              <div className="rounded-xl border border-slate-800 bg-slate-900 p-8 min-h-[700px]">
+              <div className="rounded-xl border border-slate-800 bg-slate-900 p-8 h-[80vh] flex flex-col">
 
                 <h2 className="text-2xl font-bold mb-6">
                   AI CTO Output
                 </h2>
 
-                {!plan ? (
-                  <p className="text-slate-400 leading-8">
-                    Your AI-generated startup strategy will appear here after clicking
-                    <strong> Generate AI CTO Plan</strong>.
-                  </p>
-                ) : (
-                  <div className="prose prose-invert max-w-none">
-                    <ReactMarkdown>
-                      {plan}
-                    </ReactMarkdown>
-                  </div>
-                )}
+                <div className="flex-1 overflow-y-auto pr-2">
+
+                  {!plan ? (
+                    <p className="text-slate-400 leading-8">
+                      Your AI-generated startup strategy will appear here after clicking
+                      <strong> Generate AI CTO Plan</strong>.
+                    </p>
+                  ) : (
+                    <div className="prose prose-invert max-w-none">
+                      <ReactMarkdown>
+                        {plan}
+                      </ReactMarkdown>
+                    </div>
+                  )}
+
+                </div>
 
               </div>
-
             </div>
 
           </div>
-
         </main>
-
       </div>
     </div>
   );
