@@ -22,3 +22,39 @@ export async function sendMessage(
 
   return response.json();
 }
+
+export async function streamMessage(
+  request: ChatRequest,
+  onChunk: (chunk: string) => void
+): Promise<void> {
+  const response = await fetch(`${API}/chat/stream`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to stream response.");
+  }
+
+  if (!response.body) {
+    throw new Error("Streaming is not supported by this browser.");
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+
+  while (true) {
+    const { value, done } = await reader.read();
+
+    if (done) break;
+
+    onChunk(
+      decoder.decode(value, {
+        stream: true,
+      })
+    );
+  }
+}
