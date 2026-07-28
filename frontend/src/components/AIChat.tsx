@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-import { sendMessage } from "../services/chatService";
+import { streamMessage } from "../services/chatService";
 import MarkdownRenderer from "./MarkdownRenderer";
 
 import type { ChatMessage } from "../types/chat";
@@ -18,7 +18,9 @@ const quickActions = [
   "⚠ Risk Assessment",
 ];
 
-export default function AIChat({ projectId }: AIChatProps) {
+export default function AIChat({
+  projectId,
+}: AIChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -40,34 +42,49 @@ export default function AIChat({ projectId }: AIChatProps) {
         role: "user",
         content: question,
       },
+      {
+        role: "assistant",
+        content: "",
+      },
     ]);
 
     setLoading(true);
 
     try {
-      const response = await sendMessage({
-        project_id: projectId,
-        message: question,
-      });
-
-      setMessages((prev) => [
-        ...prev,
+      await streamMessage(
         {
-          role: "assistant",
-          content: response.reply,
+          project_id: projectId,
+          message: question,
         },
-      ]);
+        (chunk) => {
+          setMessages((prev) => {
+            const updated = [...prev];
+
+            const last = updated.length - 1;
+
+            updated[last] = {
+              ...updated[last],
+              content: updated[last].content + chunk,
+            };
+
+            return updated;
+          });
+        }
+      );
     } catch (err) {
       console.error(err);
 
-      setMessages((prev) => [
-        ...prev,
-        {
+      setMessages((prev) => {
+        const updated = [...prev];
+
+        updated[updated.length - 1] = {
           role: "assistant",
           content:
             "Sorry, something went wrong while generating a response.",
-        },
-      ]);
+        };
+
+        return updated;
+      });
     } finally {
       setLoading(false);
       setInput("");
@@ -158,9 +175,18 @@ export default function AIChat({ projectId }: AIChatProps) {
               </div>
 
               {message.role === "assistant" ? (
-                <MarkdownRenderer
-                  content={message.content}
-                />
+                <>
+                  <MarkdownRenderer
+                    content={message.content}
+                  />
+
+                  {loading &&
+                    index === messages.length - 1 && (
+                      <span className="animate-pulse text-indigo-400">
+                        ▌
+                      </span>
+                    )}
+                </>
               ) : (
                 <p className="whitespace-pre-wrap">
                   {message.content}
@@ -170,22 +196,17 @@ export default function AIChat({ projectId }: AIChatProps) {
           </div>
         ))}
 
-        {loading && (
-          <div className="flex">
-            <div className="rounded-xl border border-slate-700 bg-slate-900 px-5 py-4">
-              🤖 ASTRA is thinking...
-            </div>
-          </div>
-        )}
-
         <div ref={bottomRef} />
 
       </div>
 
       <div className="flex gap-3">
+
         <input
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) =>
+            setInput(e.target.value)
+          }
           onKeyDown={handleKeyDown}
           placeholder="Ask anything about your startup..."
           className="flex-1 rounded-lg border border-slate-700 bg-slate-950 p-3 outline-none focus:border-indigo-500"
@@ -198,6 +219,7 @@ export default function AIChat({ projectId }: AIChatProps) {
         >
           Send
         </button>
+
       </div>
 
     </div>
