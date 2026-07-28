@@ -5,11 +5,14 @@ import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import ProjectOverview from "../components/ProjectOverview";
 import AIOutputPanel from "../components/AIOutputPanel";
+import VersionHistory from "../components/VersionHistory";
+import AIChat from "../components/AIChat";
 
 import { getProject } from "../services/projectService";
 import { generatePlan } from "../services/astraService";
-
-import type { Project } from "../types/project";
+import {
+  getProjectVersion,
+} from "../services/versionService";
 
 export default function ProjectPage() {
   const { id } = useParams();
@@ -26,29 +29,28 @@ export default function ProjectPage() {
   const [loading, setLoading] = useState(false);
   const [plan, setPlan] = useState("");
 
-  useEffect(() => {
-    async function loadProject() {
-      if (!id) return;
+  async function refreshProject() {
+    if (!id) return;
 
-      try {
-        const data = await getProject(Number(id));
+    try {
+      const data = await getProject(Number(id));
 
-        setProject(data);
+      setProject(data);
 
-        // Restore the complete workspace
-        setIdea(data.idea ?? "");
-        setProblem(data.problem ?? "");
-        setAudience(data.audience ?? "");
-        setGoal(data.goal ?? "");
-        setBudget(data.budget ?? "");
-        setTimeline(data.timeline ?? "");
-        setPlan(data.ai_report ?? "");
-      } catch (err) {
-        console.error(err);
-      }
+      setIdea(data.idea ?? "");
+      setProblem(data.problem ?? "");
+      setAudience(data.audience ?? "");
+      setGoal(data.goal ?? "");
+      setBudget(data.budget ?? "");
+      setTimeline(data.timeline ?? "");
+      setPlan(data.ai_report ?? "");
+    } catch (err) {
+      console.error(err);
     }
+  }
 
-    loadProject();
+  useEffect(() => {
+    refreshProject();
   }, [id]);
 
   async function handleGenerate() {
@@ -78,6 +80,8 @@ export default function ProjectPage() {
       });
 
       setPlan(response.plan);
+
+      await refreshProject();
     } catch (err) {
       console.error(err);
       alert("Failed to generate AI plan.");
@@ -94,6 +98,23 @@ export default function ProjectPage() {
     } catch (err) {
       console.error(err);
       alert("Failed to copy report.");
+    }
+  }
+
+  async function handleSelectVersion(versionId: number) {
+    try {
+      const version = await getProjectVersion(versionId);
+
+      setIdea(version.idea ?? "");
+      setProblem(version.problem ?? "");
+      setAudience(version.audience ?? "");
+      setGoal(version.goal ?? "");
+      setBudget(version.budget ?? "");
+      setTimeline(version.timeline ?? "");
+      setPlan(version.ai_report);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to load version.");
     }
   }
 
@@ -114,7 +135,9 @@ export default function ProjectPage() {
 
         <main className="p-10">
           <div className="mb-8">
-            <h1 className="text-4xl font-bold">{project.name}</h1>
+            <h1 className="text-4xl font-bold">
+              {project.name}
+            </h1>
 
             <p className="mt-2 text-slate-400">
               Status: {project.status}
@@ -122,7 +145,20 @@ export default function ProjectPage() {
           </div>
 
           <div className="grid grid-cols-12 gap-8">
-            <div className="col-span-7">
+
+            {/* Version History */}
+
+            <div className="col-span-3">
+              <VersionHistory
+                projectId={project.id}
+                onSelectVersion={handleSelectVersion}
+                onRestore={refreshProject}
+              />
+            </div>
+
+            {/* Project Overview */}
+
+            <div className="col-span-4">
               <ProjectOverview
                 idea={idea}
                 problem={problem}
@@ -141,14 +177,26 @@ export default function ProjectPage() {
               />
             </div>
 
+            {/* AI Output */}
+
             <div className="col-span-5">
               <AIOutputPanel
+                projectName={project.name}
                 plan={plan}
                 loading={loading}
                 onCopy={handleCopy}
                 onRegenerate={handleGenerate}
               />
             </div>
+
+          </div>
+
+          {/* AI Startup Advisor */}
+
+          <div className="mt-8">
+            <AIChat
+              projectId={project.id}
+            />
           </div>
         </main>
       </div>

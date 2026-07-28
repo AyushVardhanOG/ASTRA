@@ -2,11 +2,20 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.schemas.project import ProjectCreate, ProjectResponse
+
+from app.schemas.project import (
+    ProjectCreate,
+    ProjectResponse,
+    ProjectVersionResponse,
+)
+
 from app.services.project_service import (
     create_project,
     get_projects,
     get_project,
+    get_project_versions,
+    get_project_version,
+    restore_project_version,
 )
 
 router = APIRouter(
@@ -56,3 +65,66 @@ def add_project(
         db,
         project.name,
     )
+
+
+# -----------------------------
+# Version History
+# -----------------------------
+
+
+@router.get(
+    "/{project_id}/versions",
+    response_model=list[ProjectVersionResponse],
+)
+def read_project_versions(
+    project_id: int,
+    db: Session = Depends(get_db),
+):
+    return get_project_versions(
+        db,
+        project_id,
+    )
+
+
+@router.get(
+    "/version/{version_id}",
+    response_model=ProjectVersionResponse,
+)
+def read_project_version(
+    version_id: int,
+    db: Session = Depends(get_db),
+):
+    version = get_project_version(
+        db,
+        version_id,
+    )
+
+    if version is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Version not found",
+        )
+
+    return version
+
+
+@router.post(
+    "/version/{version_id}/restore",
+    response_model=ProjectResponse,
+)
+def restore_version(
+    version_id: int,
+    db: Session = Depends(get_db),
+):
+    project = restore_project_version(
+        db,
+        version_id,
+    )
+
+    if project is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Version not found",
+        )
+
+    return project

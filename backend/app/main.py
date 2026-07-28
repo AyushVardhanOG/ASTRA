@@ -8,6 +8,8 @@ from app.db import models
 from app.api.astra import router as astra_router
 from app.api.projects import router as project_router
 
+from app.api.chat import router as chat_router
+
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
@@ -28,3 +30,4 @@ app.add_middleware(
 
 app.include_router(astra_router)
 app.include_router(project_router)
+app.include_router(chat_router)
