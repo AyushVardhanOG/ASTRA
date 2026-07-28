@@ -5,7 +5,7 @@ export default function Sidebar() {
     `block w-full rounded-lg px-4 py-3 transition ${
       isActive
         ? "bg-indigo-600 text-white"
-        : "hover:bg-slate-800 text-slate-200"
+        : "text-slate-200 hover:bg-slate-800"
     }`;
 
   return (
@@ -19,17 +19,20 @@ export default function Sidebar() {
           🏠 Dashboard
         </NavLink>
 
-        <NavLink to="/projects" className={linkClass}>
+        <div className="rounded-lg px-4 py-3 text-slate-500 cursor-not-allowed">
           📁 Projects
-        </NavLink>
+          <p className="text-xs mt-1">Coming Soon</p>
+        </div>
 
-        <NavLink to="/agents" className={linkClass}>
+        <div className="rounded-lg px-4 py-3 text-slate-500 cursor-not-allowed">
           🤖 AI Agents
-        </NavLink>
+          <p className="text-xs mt-1">Coming Soon</p>
+        </div>
 
-        <NavLink to="/settings" className={linkClass}>
+        <div className="rounded-lg px-4 py-3 text-slate-500 cursor-not-allowed">
           ⚙️ Settings
-        </NavLink>
+          <p className="text-xs mt-1">Coming Soon</p>
+        </div>
       </nav>
     </aside>
   );

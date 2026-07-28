@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import ReactMarkdown from "react-markdown";
 
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import ProjectOverview from "../components/ProjectOverview";
+import AIOutputPanel from "../components/AIOutputPanel";
 
 import { getProject } from "../services/projectService";
 import { generatePlan } from "../services/astraService";
@@ -35,9 +35,14 @@ export default function ProjectPage() {
 
         setProject(data);
 
-        if (data.ai_report) {
-          setPlan(data.ai_report);
-        }
+        // Restore the complete workspace
+        setIdea(data.idea ?? "");
+        setProblem(data.problem ?? "");
+        setAudience(data.audience ?? "");
+        setGoal(data.goal ?? "");
+        setBudget(data.budget ?? "");
+        setTimeline(data.timeline ?? "");
+        setPlan(data.ai_report ?? "");
       } catch (err) {
         console.error(err);
       }
@@ -81,6 +86,17 @@ export default function ProjectPage() {
     }
   }
 
+  async function handleCopy() {
+    if (!plan) return;
+
+    try {
+      await navigator.clipboard.writeText(plan);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to copy report.");
+    }
+  }
+
   if (!project) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white">
@@ -98,9 +114,7 @@ export default function ProjectPage() {
 
         <main className="p-10">
           <div className="mb-8">
-            <h1 className="text-4xl font-bold">
-              {project.name}
-            </h1>
+            <h1 className="text-4xl font-bold">{project.name}</h1>
 
             <p className="mt-2 text-slate-400">
               Status: {project.status}
@@ -108,7 +122,6 @@ export default function ProjectPage() {
           </div>
 
           <div className="grid grid-cols-12 gap-8">
-
             <div className="col-span-7">
               <ProjectOverview
                 idea={idea}
@@ -129,32 +142,13 @@ export default function ProjectPage() {
             </div>
 
             <div className="col-span-5">
-              <div className="rounded-xl border border-slate-800 bg-slate-900 p-8 h-[80vh] flex flex-col">
-
-                <h2 className="text-2xl font-bold mb-6">
-                  AI CTO Output
-                </h2>
-
-                <div className="flex-1 overflow-y-auto pr-2">
-
-                  {!plan ? (
-                    <p className="text-slate-400 leading-8">
-                      Your AI-generated startup strategy will appear here after clicking
-                      <strong> Generate AI CTO Plan</strong>.
-                    </p>
-                  ) : (
-                    <div className="prose prose-invert max-w-none">
-                      <ReactMarkdown>
-                        {plan}
-                      </ReactMarkdown>
-                    </div>
-                  )}
-
-                </div>
-
-              </div>
+              <AIOutputPanel
+                plan={plan}
+                loading={loading}
+                onCopy={handleCopy}
+                onRegenerate={handleGenerate}
+              />
             </div>
-
           </div>
         </main>
       </div>

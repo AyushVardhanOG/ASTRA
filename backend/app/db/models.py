@@ -15,6 +15,18 @@ class Project(Base):
         default="Planning",
     )
 
+    idea = Column(Text, nullable=True)
+
+    problem = Column(Text, nullable=True)
+
+    audience = Column(Text, nullable=True)
+
+    goal = Column(Text, nullable=True)
+
+    budget = Column(String, nullable=True)
+
+    timeline = Column(String, nullable=True)
+
     ai_report = Column(
         Text,
         nullable=True,

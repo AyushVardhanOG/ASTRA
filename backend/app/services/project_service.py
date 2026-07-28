@@ -28,17 +28,29 @@ def create_project(db: Session, name: str):
     return project
 
 
-def save_ai_report(
+def update_project_workspace(
     db: Session,
     project_id: int,
-    report: str,
+    idea: str,
+    problem: str,
+    audience: str,
+    goal: str,
+    budget: str,
+    timeline: str,
+    ai_report: str,
 ):
     project = get_project(db, project_id)
 
     if project is None:
         return None
 
-    project.ai_report = report
+    project.idea = idea
+    project.problem = problem
+    project.audience = audience
+    project.goal = goal
+    project.budget = budget
+    project.timeline = timeline
+    project.ai_report = ai_report
 
     db.commit()
     db.refresh(project)

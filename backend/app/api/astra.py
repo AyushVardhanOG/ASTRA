@@ -11,7 +11,7 @@ from app.schemas.ai import (
 
 from app.services.astra_service import AstraService
 from app.services.ai_service import generate_plan
-from app.services.project_service import save_ai_report
+from app.services.project_service import update_project_workspace
 
 router = APIRouter(
     prefix="/astra",
@@ -40,10 +40,16 @@ async def create_plan(
 ):
     plan = await generate_plan(request)
 
-    save_ai_report(
-        db,
-        request.project_id,
-        plan,
+    update_project_workspace(
+        db=db,
+        project_id=request.project_id,
+        idea=request.idea,
+        problem=request.problem,
+        audience=request.audience,
+        goal=request.goal,
+        budget=request.budget,
+        timeline=request.timeline,
+        ai_report=plan,
     )
 
     return GeneratePlanResponse(
