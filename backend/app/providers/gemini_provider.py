@@ -21,3 +21,17 @@ class GeminiProvider(BaseAIProvider):
         )
 
         return response.text
+
+    async def stream_generate(self, prompt: str):
+        """
+        Streams Gemini response chunk-by-chunk.
+        """
+
+        stream = self.model.generate_content(
+            prompt,
+            stream=True,
+        )
+
+        for chunk in stream:
+            if chunk.text:
+                yield chunk.text

@@ -27,3 +27,26 @@ async def chat_with_project(
     )
 
     return await provider.generate(prompt)
+
+
+async def stream_chat_with_project(
+    db: Session,
+    project_id: int,
+    message: str,
+):
+    project = (
+        db.query(Project)
+        .filter(Project.id == project_id)
+        .first()
+    )
+
+    if project is None:
+        return
+
+    prompt = build_chat_prompt(
+        project,
+        message,
+    )
+
+    async for chunk in provider.stream_generate(prompt):
+        yield chunk
