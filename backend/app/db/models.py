@@ -46,6 +46,13 @@ class Project(Base):
         order_by="ProjectVersion.version_number.desc()",
     )
 
+    chat_messages = relationship(
+        "ChatMessage",
+        back_populates="project",
+        cascade="all, delete-orphan",
+        order_by="ChatMessage.created_at.asc()",
+    )
+
 
 class ProjectVersion(Base):
     __tablename__ = "project_versions"
@@ -78,4 +85,37 @@ class ProjectVersion(Base):
     project = relationship(
         "Project",
         back_populates="versions",
+    )
+
+
+class ChatMessage(Base):
+    __tablename__ = "chat_messages"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    project_id = Column(
+        Integer,
+        ForeignKey("projects.id"),
+        nullable=False,
+    )
+
+    role = Column(
+        String,
+        nullable=False,
+    )
+
+    content = Column(
+        Text,
+        nullable=False,
+    )
+
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        nullable=False,
+    )
+
+    project = relationship(
+        "Project",
+        back_populates="chat_messages",
     )

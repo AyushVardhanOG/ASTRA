@@ -3,6 +3,7 @@ const API = "http://127.0.0.1:8000";
 import type {
   ChatRequest,
   ChatResponse,
+  ChatMessage,
 } from "../types/chat";
 
 export async function sendMessage(
@@ -40,7 +41,7 @@ export async function streamMessage(
   }
 
   if (!response.body) {
-    throw new Error("Streaming is not supported by this browser.");
+    throw new Error("Streaming is not supported.");
   }
 
   const reader = response.body.getReader();
@@ -57,4 +58,18 @@ export async function streamMessage(
       })
     );
   }
+}
+
+export async function getChatHistory(
+  projectId: number
+): Promise<ChatMessage[]> {
+  const response = await fetch(
+    `${API}/chat/history/${projectId}`
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to load chat history.");
+  }
+
+  return response.json();
 }

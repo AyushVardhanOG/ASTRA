@@ -7,11 +7,13 @@ from app.db.session import get_db
 from app.schemas.chat import (
     ChatRequest,
     ChatResponse,
+    ChatMessageResponse,
 )
 
 from app.services.chat_service import (
     chat_with_project,
     stream_chat_with_project,
+    get_chat_history,
 )
 
 router = APIRouter(
@@ -56,13 +58,29 @@ async def stream_chat(
         message=request.message,
     )
 
-    if generator is None:
+    return StreamingResponse(
+        generator,
+        media_type="text/plain",
+    )
+
+
+@router.get(
+    "/history/{project_id}",
+    response_model=list[ChatMessageResponse],
+)
+async def chat_history(
+    project_id: int,
+    db: Session = Depends(get_db),
+):
+    history = await get_chat_history(
+        db=db,
+        project_id=project_id,
+    )
+
+    if history is None:
         raise HTTPException(
             status_code=404,
             detail="Project not found",
         )
 
-    return StreamingResponse(
-        generator,
-        media_type="text/plain",
-    )
+    return history
